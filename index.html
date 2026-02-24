@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinyl Record</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #282c34;
+            color: white;
+        }
+        .vinyl-record {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: black;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .groove {
+            position: absolute;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            animation: spin 8s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="vinyl-record">
+        <svg class="groove" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="49" fill="transparent" stroke="white" stroke-width="2" />
+            <circle cx="50" cy="50" r="42" fill="transparent" stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" />
+            <circle cx="50" cy="50" r="35" fill="transparent" stroke="white" stroke-width="2" />
+            <circle cx="50" cy="50" r="28" fill="transparent" stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" />
+            <circle cx="50" cy="50" r="21" fill="transparent" stroke="white" stroke-width="2" />
+            <circle cx="50" cy="50" r="14" fill="transparent" stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" />
+        </svg>
+    </div>
+</body>
+</html>
