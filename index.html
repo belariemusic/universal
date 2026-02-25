@@ -1,53 +1,535 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vinyl Record</title>
+    <title>High-End Webový Gramofon - Belarie Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
     <style>
+        /* --- POZADÍ AZZURO --- */
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #282c34;
-            color: white;
+            background: radial-gradient(circle at 50% 50%, #3399ff 0%, #002255 100%);
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden; 
         }
+
+        :root {
+            --scale-factor: 1.0; 
+            --spin-speed: 1.8s; 
+            --vinyl-offset-x: 0px; 
+            --vinyl-offset-y: 0px; 
+            --vinyl-zoom: 102%; 
+            --azzuro: #00e5ff; 
+        }
+
+        /* --- HLAVNÍ KONTEJNER --- */
+        .gramophone-setup {
+            position: relative; 
+            width: 1150px; 
+            height: 560px; 
+            transform: scale(var(--scale-factor));
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
+        }
+
+        /* --- 3D KOULE (NOŽIČKY) --- */
+        .foot {
+            position: absolute; width: 80px; height: 80px;
+            background: radial-gradient(circle at 30% 30%, #fff, #bbb, #333);
+            border-radius: 50%; box-shadow: 0 20px 20px rgba(0,0,0,0.5);
+            z-index: 0;
+        }
+        .foot.tl { top: 20px; left: 20px; }
+        .foot.tr { top: 20px; right: 20px; }
+        .foot.bl { bottom: 20px; left: 20px; }
+        .foot.br { bottom: 20px; right: 20px; }
+
+        /* --- SKLENĚNÁ DESKA --- */
+        .glass-plinth {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.12); 
+            backdrop-filter: blur(15px); 
+            border-radius: 15px;
+            border-top: 1px solid rgba(255,255,255,0.7);
+            border-left: 1px solid rgba(255,255,255,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            box-shadow: inset 0 0 30px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1;
+        }
+
+        /* --- ŘEMÍNEK --- */
+        .drive-belt-svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; pointer-events: none; 
+        }
+        #beltPath {
+            fill: none; stroke: #111; stroke-width: 3;
+            filter: drop-shadow(0 8px 4px rgba(0,0,0,0.3)); 
+        }
+
+        /* --- MOTOR --- */
+        .motor-pulley {
+            position: absolute; top: 90px; left: 140px;
+            width: 70px; height: 70px;
+            background: conic-gradient(from 0deg, #ccc, #fff, #888, #fff, #ccc);
+            border-radius: 50%; box-shadow: 0 15px 20px rgba(0,0,0,0.4), inset 0 2px 5px #fff;
+            z-index: 3; display: flex; justify-content: center; align-items: center;
+        }
+        .motor-cone {
+            width: 20px; height: 20px;
+            background: radial-gradient(circle at 30% 30%, #fff, #666);
+            border-radius: 50%; box-shadow: 0 5px 5px rgba(0,0,0,0.5);
+        }
+        .motor-pulley.spinning { animation: spin calc(var(--spin-speed) / 4) linear infinite; }
+
+        /* --- TALÍŘ --- */
+        .massive-platter {
+            position: absolute; top: 30px; left: 320px; 
+            width: 500px; height: 500px; border-radius: 50%;
+            background: 
+                repeating-radial-gradient(circle, transparent, transparent 15px, rgba(0,0,0,0.15) 16px, rgba(255,255,255,0.4) 18px, transparent 19px),
+                conic-gradient(from 45deg, #aaa, #fff, #777, #fff, #aaa);
+            box-shadow: 0 25px 40px rgba(0,0,0,0.5), inset 0 -5px 10px rgba(0,0,0,0.3), inset 0 5px 10px #fff;
+            z-index: 4; display: flex; justify-content: center; align-items: center;
+        }
+
         .vinyl-record {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: black;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            position: absolute; width: 460px; height: 460px; border-radius: 50%;
+            background-image: url('gramodeska 01.png');
+            background-position: calc(50% + var(--vinyl-offset-x)) calc(50% + var(--vinyl-offset-y));
+            background-size: var(--vinyl-zoom); background-repeat: no-repeat; 
+            mix-blend-mode: multiply; opacity: 0.85;
+            z-index: 5;
         }
-        .groove {
+        .massive-platter.spinning { animation: spin var(--spin-speed) linear infinite; }
+        
+        .center-cone { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 65px; height: 65px; background: conic-gradient(from 180deg, #555, #fff, #333, #fff, #555); 
+            border-radius: 50%; z-index: 12; box-shadow: 0 15px 25px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,1); 
+        }
+        .center-cone::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 10px; height: 10px; background: #111; border-radius: 50%; box-shadow: inset 0 2px 5px #000;
+        }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* --- RAMÉNKO --- */
+        .tonearm-wrapper { position: absolute; top: 100px; right: 200px; z-index: 20; }
+        
+        .pivot-glass { 
+            position: absolute; top: -35px; left: -35px; width: 70px; height: 70px; 
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); border-radius: 50%; 
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.5); z-index: 19; pointer-events: none;
+        }
+        .pivot-metal {
+            position: absolute; top: -20px; left: -20px; width: 40px; height: 40px;
+            background: conic-gradient(from 0deg, #ccc, #fff, #777, #fff, #ccc); border-radius: 50%;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.4); z-index: 21; pointer-events: none;
+        }
+
+        .tonearm { 
+            position: absolute; top: -65px; left: -6px; width: 12px; height: 485px; 
+            background: linear-gradient(90deg, #999, #fff, #666); border-radius: 6px; 
+            transform-origin: 6px 65px; 
+            transform: rotate(0deg); cursor: grab; 
+            box-shadow: -15px 30px 30px rgba(0,0,0,0.4); z-index: 20;
+        }
+        .tonearm.returning { transition: transform 1.2s ease-in-out; }
+        
+        .tonearm::before { 
+            content: ''; position: absolute; top: 0px; left: 50%; transform: translateX(-50%); 
+            width: 45px; height: 30px; background: conic-gradient(from 90deg, #aaa, #fff, #555, #fff, #aaa); 
+            border-radius: 4px; box-shadow: 0 10px 15px rgba(0,0,0,0.4); 
+        }
+
+        .tonearm::after { 
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%) rotate(20deg); 
+            width: 22px; height: 45px; background: linear-gradient(135deg, #222, #000); 
+            border-radius: 3px; border-bottom: 4px solid #d4af37; box-shadow: -5px 10px 15px rgba(0,0,0,0.5); 
+        }
+        
+        /* --- E-MAIL VLEVO DOLE V OSE KOULE --- */
+        .email-bottom-left {
             position: absolute;
-            border: 2px solid transparent;
-            border-radius: 50%;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            animation: spin 8s linear infinite;
+            bottom: 53px; /* Vycentrováno se středem koule */
+            left: 120px;  /* Za koulí směrem k desce */
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 14px; 
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.4); 
+            text-shadow: 1px 2px 3px rgba(0,0,0,0.4); 
+            letter-spacing: 1px;
+            z-index: 20;
         }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+
+        /* --- OVLÁDACÍ PANEL VPRAVO (V OSE, ZMENŠENÉ VOLUME) --- */
+        .controls-right-stack {
+            position: absolute; top: 50%; right: 40px; /* Posunuto více doprava od přenosky */
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 50px; /* Krásný rozestup mezi prvky */
+            z-index: 20; 
+            width: 110px; /* Užší blok pro menší volume */
         }
+
+        /* 1. Šipky do stran (Nahoře) */
+        .playlist-controls { 
+            display: flex; gap: 30px; justify-content: center; width: 100%;
+        }
+        .text-arrow-btn { 
+            background: transparent; border: none; 
+            color: rgba(255, 255, 255, 0.4); 
+            font-family: Arial, sans-serif; font-size: 20px; font-weight: bold; 
+            cursor: pointer; transition: all 0.3s ease; text-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+            padding: 0; outline: none;
+        }
+        .text-arrow-btn:hover { 
+            color: var(--azzuro); 
+            text-shadow: 0 0 10px var(--azzuro); 
+            transform: scale(1.2);
+        }
+
+        /* 2. Zmenšené Volume (Uprostřed) */
+        .slider-container { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px; }
+        .white-text { 
+            color: rgba(255, 255, 255, 0.5); font-family: 'Orbitron', sans-serif; 
+            font-size: 12px; font-weight: bold; letter-spacing: 2px;
+            text-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+        }
+        
+        input[type="range"] { 
+            -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; width: 100%; 
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #fff; margin-top: -5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* 3. Vypínač OFF/ON (Dole) */
+        .text-switch {
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 14px; 
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.4); cursor: pointer; user-select: none;
+            text-shadow: 1px 2px 3px rgba(0,0,0,0.4); transition: all 0.3s ease; letter-spacing: 2px;
+        }
+        
+        .text-switch.is-on {
+            color: #fff;
+            text-shadow: 0 0 8px var(--azzuro), 0 0 16px var(--azzuro);
+        }
+
+        /* --- VYSOUVACÍ PANEL --- */
+        .track-panel {
+            position: fixed; bottom: -150px; left: 50%; transform: translateX(-50%);
+            background: rgba(20, 30, 50, 0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid var(--azzuro); border-radius: 15px 15px 0 0;
+            padding: 20px 50px; box-shadow: 0 -10px 40px rgba(0, 127, 255, 0.2);
+            transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; text-align: center;
+        }
+        .track-panel.visible { bottom: 0; }
+        .track-name { color: #fff; font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
     </style>
 </head>
 <body>
-    <div class="vinyl-record">
-        <svg class="groove" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="49" fill="transparent" stroke="white" stroke-width="2" />
-            <circle cx="50" cy="50" r="42" fill="transparent" stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" />
-            <circle cx="50" cy="50" r="35" fill="transparent" stroke="white" stroke-width="2" />
-            <circle cx="50" cy="50" r="28" fill="transparent" stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" />
-            <circle cx="50" cy="50" r="21" fill="transparent" stroke="white" stroke-width="2" />
-            <circle cx="50" cy="50" r="14" fill="transparent" stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" />
-        </svg>
+
+    <div class="gramophone-setup">
+        <div class="foot tl"></div><div class="foot tr"></div>
+        <div class="foot bl"></div><div class="foot br"></div>
+        
+        <div class="glass-plinth">
+            
+            <svg class="drive-belt-svg" viewBox="0 0 1150 560">
+                <path id="beltPath" d="M 165 91 L 530 33 A 250 250 0 1 1 455 502 L 188 157 A 35 35 0 0 1 165 91" />
+            </svg>
+
+            <div class="motor-pulley" id="motorGear">
+                <div class="motor-cone"></div>
+            </div>
+
+            <div class="email-bottom-left">belarie@gmail.com</div>
+
+            <div class="controls-right-stack">
+                <div class="playlist-controls">
+                    <button class="text-arrow-btn" id="prevBtn">◄</button>
+                    <button class="text-arrow-btn" id="nextBtn">►</button>
+                </div>
+                
+                <div class="slider-container">
+                    <span class="white-text">VOLUME</span>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+                </div>
+
+                <div id="powerBtn" class="text-switch">OFF</div>
+            </div>
+
+            <div class="massive-platter" id="recordPlatter">
+                <div class="vinyl-record"></div>
+                <div class="center-cone" id="spindle"></div>
+            </div>
+
+            <div class="tonearm-wrapper">
+                <div class="pivot-glass"></div>
+                <div class="pivot-metal"></div>
+                <div class="tonearm" id="tonearm"></div>
+            </div>
+        </div>
     </div>
+
+    <div class="track-panel" id="trackPanel"><div class="track-name" id="trackNameDisplay">Načítání...</div></div>
+
+    <audio id="audioPlayer" src=""></audio>
+    <audio id="cracklePlayer" src="praskani.mp3" loop></audio>
+
+    <script>
+        const playlist = [
+            { title: "MY WAY C MAJOR", src: "track1.mp3" },
+            { title: "SILENT WAY", src: "track2.mp3" },
+            { title: "MO BETTER BLUES", src: "track3.mp3" },
+            { title: "CRY ME A RIVER", src: "track4.mp3" },
+            { title: "SHE", src: "track5.mp3" },
+            { title: "ALMOST BLUE", src: "track6.mp3" },
+            { title: "MACK THE KNIFE", src: "track7.mp3" }
+        ];
+
+        const CRACKLE_START_ANGLE = 32; 
+        const MUSIC_START_ANGLE = 35;   
+        const MUSIC_END_ANGLE = 54;     
+        
+        const ANGLE_PER_TRACK = (MUSIC_END_ANGLE - MUSIC_START_ANGLE) / playlist.length;
+
+        let currentTrackIndex = parseInt(localStorage.getItem('gramo_track')) || 0;
+        if (currentTrackIndex >= playlist.length) currentTrackIndex = 0; 
+        
+        let savedVolume = parseFloat(localStorage.getItem('gramo_volume')) || 0.5;
+
+        const powerBtn = document.getElementById('powerBtn');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const cracklePlayer = document.getElementById('cracklePlayer');
+        const tonearm = document.getElementById('tonearm');
+        const recordPlatter = document.getElementById('recordPlatter');
+
+        audioPlayer.onerror = function() {
+            if (audioPlayer.src && audioPlayer.src !== window.location.href) {
+                console.error("POZOR: Písnička se nenačetla: " + playlist[currentTrackIndex].src);
+            }
+        };
+
+        volumeSlider.value = savedVolume;
+        audioPlayer.volume = savedVolume;
+        cracklePlayer.volume = 0.5; 
+
+        let isPowerOn = false;
+        let isDragging = false;
+        let currentAngle = 0;
+        let slowdownInterval = null;
+        let autoStartTimeout = null;
+        let audioUnlocked = false;
+
+        function unlockAudio() {
+            if (!audioUnlocked) {
+                audioPlayer.muted = true;
+                audioPlayer.play().then(() => {
+                    audioPlayer.pause();
+                    audioPlayer.muted = false;
+                }).catch(()=>{});
+                
+                cracklePlayer.muted = true;
+                cracklePlayer.play().then(() => {
+                    cracklePlayer.pause();
+                    cracklePlayer.muted = false;
+                }).catch(()=>{});
+                
+                audioUnlocked = true;
+            }
+        }
+        document.addEventListener('click', unlockAudio, {once:true});
+        document.addEventListener('touchstart', unlockAudio, {once:true});
+
+        function updateVolumeSliderColor() {
+            const val = volumeSlider.value * 100;
+            volumeSlider.style.background = `linear-gradient(to right, var(--azzuro) ${val}%, rgba(255,255,255,0.3) ${val}%)`;
+        }
+        updateVolumeSliderColor();
+
+        function loadTrack(index) {
+            audioPlayer.src = playlist[index].src;
+            audioPlayer.load();
+            document.getElementById('trackNameDisplay').textContent = playlist[index].title;
+            localStorage.setItem('gramo_track', index);
+            if (isPowerOn && currentAngle >= MUSIC_START_ANGLE && currentAngle <= MUSIC_END_ANGLE) {
+                setTimeout(() => audioPlayer.play().catch(e=>{}), 50);
+            }
+        }
+
+        loadTrack(currentTrackIndex);
+
+        function powerOffSlowdown() {
+            clearInterval(slowdownInterval);
+            let rate = audioPlayer.playbackRate;
+            slowdownInterval = setInterval(() => {
+                rate -= 0.05;
+                if (rate <= 0.1) {
+                    clearInterval(slowdownInterval);
+                    audioPlayer.pause();
+                    cracklePlayer.pause();
+                    audioPlayer.playbackRate = 1.0;
+                } else {
+                    audioPlayer.playbackRate = rate;
+                }
+            }, 50);
+        }
+
+        function togglePower() {
+            unlockAudio();
+            clearTimeout(autoStartTimeout);
+            isPowerOn = !isPowerOn;
+
+            if (isPowerOn) {
+                clearInterval(slowdownInterval);
+                audioPlayer.playbackRate = 1.0;
+                
+                powerBtn.textContent = 'ON';
+                powerBtn.classList.add('is-on'); 
+                
+                tonearm.classList.add('returning');
+                currentAngle = CRACKLE_START_ANGLE + 1; 
+                tonearm.style.transform = `rotate(${currentAngle}deg)`;
+                checkPlayback();
+
+                autoStartTimeout = setTimeout(() => {
+                    if (isPowerOn) {
+                        moveTonearm();
+                    }
+                }, 2000);
+
+            } else {
+                powerBtn.textContent = 'OFF';
+                powerBtn.classList.remove('is-on');
+                powerOffSlowdown();
+                tonearm.classList.add('returning');
+                currentAngle = 0;
+                tonearm.style.transform = `rotate(0deg)`;
+            }
+            checkPlayback();
+        }
+
+        powerBtn.addEventListener('click', togglePower);
+
+        volumeSlider.addEventListener('input', (e) => {
+            audioPlayer.volume = e.target.value;
+            localStorage.setItem('gramo_volume', e.target.value);
+            updateVolumeSliderColor();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(currentTrackIndex);
+            if (isPowerOn) moveTonearm();
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentTrackIndex);
+            if (isPowerOn) moveTonearm();
+        });
+
+        function moveTonearm() {
+            clearTimeout(autoStartTimeout); 
+            currentAngle = MUSIC_START_ANGLE + (currentTrackIndex * ANGLE_PER_TRACK) + (ANGLE_PER_TRACK / 2);
+            tonearm.classList.add('returning');
+            tonearm.style.transform = `rotate(${currentAngle}deg)`;
+            setTimeout(() => { tonearm.classList.remove('returning'); checkPlayback(); }, 800);
+        }
+
+        audioPlayer.addEventListener('ended', () => {
+            if (currentTrackIndex === playlist.length - 1) {
+                if(isPowerOn) togglePower(); 
+            } else {
+                currentTrackIndex++;
+                loadTrack(currentTrackIndex);
+                moveTonearm();
+            }
+        });
+
+        function handleDragStart(e) {
+            unlockAudio();
+            clearTimeout(autoStartTimeout);
+            isDragging = true; 
+            tonearm.classList.remove('returning'); 
+            if (!isPowerOn) togglePower();
+        }
+        tonearm.addEventListener('mousedown', handleDragStart);
+        tonearm.addEventListener('touchstart', handleDragStart, {passive: true});
+
+        function handleDragEnd() { isDragging = false; }
+        document.addEventListener('mouseup', handleDragEnd);
+        document.addEventListener('touchend', handleDragEnd);
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const rect = tonearm.getBoundingClientRect();
+            const pivotX = rect.left + (rect.width / 2);
+            const pivotY = rect.top + 65; 
+            
+            let angle = Math.atan2(e.clientY - pivotY, e.clientX - pivotX) * (180 / Math.PI) - 90;
+            
+            if (angle > MUSIC_END_ANGLE + 2) {
+                isDragging = false;
+                if(isPowerOn) togglePower();
+                return;
+            }
+            
+            currentAngle = Math.max(0, angle);
+            tonearm.style.transform = `rotate(${currentAngle}deg)`;
+            
+            if (currentAngle >= MUSIC_START_ANGLE && currentAngle <= MUSIC_END_ANGLE) {
+                let idx = Math.min(playlist.length - 1, Math.floor((currentAngle - MUSIC_START_ANGLE) / ANGLE_PER_TRACK));
+                if (idx !== currentTrackIndex) { currentTrackIndex = idx; loadTrack(idx); }
+            }
+            checkPlayback();
+        });
+
+        function checkPlayback() {
+            if (!isPowerOn && currentAngle === 0) {
+                recordPlatter.classList.remove('spinning');
+                document.getElementById('motorGear').classList.remove('spinning');
+                document.getElementById('trackPanel').classList.remove('visible');
+                return;
+            }
+            const isSpinning = isPowerOn && currentAngle > 0;
+            recordPlatter.classList.toggle('spinning', isSpinning);
+            document.getElementById('motorGear').classList.toggle('spinning', isSpinning);
+
+            if (isPowerOn) {
+                if (currentAngle >= CRACKLE_START_ANGLE && currentAngle < MUSIC_START_ANGLE) {
+                    if (cracklePlayer.paused) cracklePlayer.play().catch(e=>{}); 
+                    if (!audioPlayer.paused) audioPlayer.pause();
+                    document.getElementById('trackPanel').classList.remove('visible');
+                } 
+                else if (currentAngle >= MUSIC_START_ANGLE && currentAngle <= MUSIC_END_ANGLE) {
+                    if (!cracklePlayer.paused) cracklePlayer.pause(); 
+                    if (audioPlayer.paused) audioPlayer.play().catch(e=>{});
+                    document.getElementById('trackPanel').classList.add('visible');
+                } 
+                else {
+                    if (!cracklePlayer.paused) cracklePlayer.pause(); 
+                    if (!audioPlayer.paused) audioPlayer.pause();
+                    document.getElementById('trackPanel').classList.remove('visible');
+                }
+            } else {
+                document.getElementById('trackPanel').classList.remove('visible');
+            }
+        }
+    </script>
 </body>
 </html>
